@@ -7,21 +7,28 @@ echo "This script is only intended to be used on Fedora 42 KDE Plasma Edition."
 sleep 0.2
 
 echo
+echo "Disclaimer:"
+echo "This script assumes that"
+echo
+echo "- Git is installed,"
+echo "- The Github repo this script is hosted on was cloned in its entirety, and"
+echo "- That the script is run from its root directory (where the Wallpapers directory, readme, etc. reside)."
+echo
+echo
 echo "This script will do the following:"
 
 sleep 0.5
 
 echo
 echo
-echo "	1. The script assumes that the Github repo it is hosted on was cloned entirely and resides within the cloned folder."
-echo "	   The theme and wallpapers from the root folder will be moved to their proper location on the system."
-echo "	2. A list of apps will be installed via Flatpak and RPM."
-
-sleep 1
+echo "	1. Take care of wallpapers, global theme and everything around it;"
+echo "	3. Enable RPM Fusion and multimedia codecs;"
+echo "	4. Install a list of apps via Flatpak and RPM."
+echo
+read -p "Press any key to start."
 
 echo
 echo
-
 
 # Check if the script is run as root
 if [ $(id -u) -ne 0 ]
@@ -44,30 +51,115 @@ up_to_date() {
 				return 0
 				;;
 			[Nn]* )
+				echo
 				echo "To update your system, do the following:"
 				echo
-				echo "	1. Open Discover"
-				echo "	2. Click on 'Updates' in the side bar"
-				echo "	3. Make sure every available update is selected, and click 'Update All' in the top right corner"
+				echo "	1. Open Discover;"
+				echo "	2. Click on 'Updates' in the side bar;"
+				echo "	3. Make sure every available update is selected, and click 'Update All' in the top right corner."
 				echo
 				echo
 				echo "Please update your system before running this script again."
 				exit 1
-				;;
-			* )
-				echo "Invalid input. Please enter y or n."
 				;;
 		esac
 	done
 }
 
 
-# Defining step_2 function
+# Defining step 1 function
 step_1() {
 	while true; do
-		echo -n "[y/n]"
-		read -r yesno
-		case "$yesno" in
+		clear
+		echo "== Step 1: Desktop & Global Theme =="
+		echo
+		echo "This part of the script does the following:"
+		echo
+		echo "1. Move wallpapers and profile picture to the user's Pictures directory;"
+		echo "2. Clone and execute the Catppuccin KDE Plasma theme install script;"
+		echo "3. Display further instructions."
+		echo
+		echo "Proceed with Step 1 of the script? [y/n]"
+		read -r stepone
+		case "$response" in
+			[Yy]* )
+				echo
+				echo "Initiating Step 1."
+				echo
+				echo
+				echo "Moving Wallpapers folder to '~/Pictures'..."
+				do mv 'Wallpapers' '~/Pictures'
+				echo "Done."
+				echo "Moving pfp.png to '~/Pictures/Profiles Pictures'..."
+				do mkdir '~/Pictures/Profile Pictures'
+				do mv 'pfp.png' '~/Pictures/Profile Pictures'
+				echo "Done."
+				sleep 1
+				echo
+				echo
+				echo "Next, the Catppuccin KDE Plasma theme will be cloned from the official Github repo and its install script executed."
+				echo "In the new Konsole window, enter your password and select the following options:"
+				echo
+				echo "1. Flavor: Mocha (Option 1)"
+				echo "2. Accent: Lavender (Option 14)"
+				echo "3. Window Style: Modern (Option 1)"
+				echo "4. Don't apply Global Theme"
+				echo
+				read -p "Press any key to continue."
+				echo
+				echo
+
+				# Clone Github repo
+				git clone --depth=1 https://github.com/catppuccin/kde catppuccin-kde && cd catppuccin-kde
+				do konsole -e sudo ./install.sh
+				read -p "Once the install script has finished, press any key to continue."
+				echo
+				echo "Removing Catppuccin cursor themes..."
+				do konsole --workdir ~/.local/share/icons -e rm -rf Catppuccin-Mocha-Dark-Cursors/ Catppuccin-Mocha-Lavender-Cursors/
+				echo "Done."
+				echo "Removing Catppuccin window buttons..."
+				do konsole --workdir ~/.local/share/aurorae/themes -e rm -rf CatppuccinMocha-Modern/
+				echo "Done."
+				echo "Applying Global Theme..."
+				do konsole -e lookandfeeltool --apply Catppuccin-Mocha-Lavender
+				do konsole -e /usr/libexec/kwin-applywindowdecoration Breeze
+				read -p "Done. Press any key to continue."
+
+
+				clear
+				echo "A few additional manual steps are necessary:"
+				echo
+				echo "	1. In Konsole: Settings > Window Color Scheme > Catppuccin Mocha Lavender"
+				read -p "	Press any key to open Konsole."
+				do konsole
+				echo
+				read -p "	When done, press any key to continue."
+				echo
+				echo "	2. In System Settings: Set Wallpapers directory (~/Pictures/Wallpapers) as default wallpaper location"
+				read -p "	Press any key to open System Settings."
+				do systemsettings kcm_wallpaper
+				echo
+				echo "	When done, press any key to continue."
+
+				return 0
+				;;
+			[Nn]* )
+				echo
+				echo "Skipping Step 1."
+				return 1
+				;;
+		esac
+	done
+}
+
+
+# Defining step 2 function
+step_2() {
+	while true; do
+		clear
+		echo "Proceed with Step 2 of the script? [y/n]"
+		read -r response
+		case "$response" in
 			[Yy]* )
 				echo
 				return 0
@@ -88,11 +180,9 @@ step_1() {
 up_to_date
 
 
-# Initiating Step 1
-echo "== Step 1 =="
-echo
-echo "Moving Wallpapers folder to '~/Pictures'..."
-do mv 'Wallpapers' '~/Pictures'
-echo "Moving pfp.png to '~/Pictures/Profiles Pictures'..."
-do mkdir '~/Pictures/Profile Pictures'
-do mv 'pfp.png' '~/Pictures/Profile Pictures'
+# Calling step 1 function
+step_1
+
+
+# Calling step 2 function
+step_2
