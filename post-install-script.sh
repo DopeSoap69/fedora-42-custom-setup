@@ -38,6 +38,10 @@ if [ $(id -u) -ne 0 ]
 		exit 1
 fi
 
+# Defining color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
 
 # Defining up_to_date function
 up_to_date() {
@@ -91,8 +95,8 @@ step_1() {
 				do mv 'Wallpapers' '~/Pictures'
 				echo "Done."
 				echo "Moving pfp.png to '~/Pictures/Profiles Pictures'..."
-				do mkdir '~/Pictures/Profile Pictures'
-				do mv 'pfp.png' '~/Pictures/Profile Pictures'
+				mkdir ~/Pictures/Profile\ Pictures/
+				mv pfp.png ~/Pictures/Profile\ Pictures
 				echo "Done."
 				sleep 1
 				echo
@@ -111,35 +115,29 @@ step_1() {
 
 				# Clone Github repo
 				git clone --depth=1 https://github.com/catppuccin/kde catppuccin-kde && cd catppuccin-kde
-				do konsole -e sudo ./install.sh
+				konsole -e sudo ./install.sh
 				read -p "Once the install script has finished, press any key to continue."
 				echo
-				echo "Removing Catppuccin cursor themes..."
-				do konsole --workdir ~/.local/share/icons -e rm -rf Catppuccin-Mocha-Dark-Cursors/ Catppuccin-Mocha-Lavender-Cursors/
-				echo "Done."
-				echo "Removing Catppuccin window buttons..."
-				do konsole --workdir ~/.local/share/aurorae/themes -e rm -rf CatppuccinMocha-Modern/
-				echo "Done."
-				echo "Applying Global Theme..."
-				do konsole -e lookandfeeltool --apply Catppuccin-Mocha-Lavender
-				do konsole -e /usr/libexec/kwin-applywindowdecoration Breeze
-				read -p "Done. Press any key to continue."
+				echo "{$GREEN}Removing Catppuccin cursor themes...{$NC}"
+				konsole --workdir ~/.local/share/icons -e rm -rf Catppuccin-Mocha-Dark-Cursors/ Catppuccin-Mocha-Lavender-Cursors/
+				echo "{$GREEN}Done.{$NC}"
+				echo "{$GREEN}Removing Catppuccin window buttons...{$NC}"
+				konsole --workdir ~/.local/share/aurorae/themes -e rm -rf CatppuccinMocha-Modern/
+				echo "{$GREEN}Done.{$NC}"
+				echo "{$GREEN}Applying Global Theme...{$NC}"
+				konsole -e lookandfeeltool --apply Catppuccin-Mocha-Lavender
+				konsole -e /usr/libexec/kwin-applywindowdecoration Breeze
+				read -p "{$GREEN}Done.{$NC} Press any key to continue."
 
 
 				clear
 				echo "A few additional manual steps are necessary:"
 				echo
 				echo "	1. In Konsole: Settings > Window Color Scheme > Catppuccin Mocha Lavender"
-				read -p "	Press any key to open Konsole."
-				do konsole
-				echo
-				read -p "	When done, press any key to continue."
-				echo
 				echo "	2. In System Settings: Set Wallpapers directory (~/Pictures/Wallpapers) as default wallpaper location"
-				read -p "	Press any key to open System Settings."
-				do systemsettings kcm_wallpaper
 				echo
-				echo "	When done, press any key to continue."
+				echo
+				echo "When done, press any key to continue."
 
 				return 0
 				;;
